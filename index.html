@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আমার ছবির গ্যালারি | My Photo Gallery</title>
+<meta name="description" content="আমার তোলা ছবির সংগ্রহ। My photo collection, updated regularly.">
+<meta property="og:title" content="আমার ছবির গ্যালারি | My Photo Gallery">
+<meta property="og:description" content="আমার তোলা ছবির সংগ্রহ।">
+<meta property="og:type" content="website">
+<style>
+:root{--bg:#eef0f2;--ink:#1b2430;--mute:#5d6875;--accent:#2b4c7e}
+@media (prefers-color-scheme:dark){:root{--bg:#14181d;--ink:#e8ecf0;--mute:#9aa5b1;--accent:#8fb3e8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;line-height:1.5}
+header{padding:2.5rem 1rem 1.5rem;text-align:center}
+h1{margin:0;font-size:clamp(1.8rem,6vw,3rem);font-weight:700;letter-spacing:-.02em}
+header p{margin:.5rem 0 0;color:var(--mute)}
+main{max-width:1200px;margin:0 auto;padding:0 .75rem 3rem;columns:2 160px;column-gap:.75rem}
+@media(min-width:800px){main{columns:3 240px}}
+figure{margin:0 0 .75rem;break-inside:avoid}
+figure img{width:100%;display:block;border-radius:6px;cursor:zoom-in;background:#0002}
+#msg{text-align:center;color:var(--mute);padding:3rem 1rem;column-span:all}
+#lb{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:9;padding:1rem}
+#lb.on{display:flex}
+#lb img{max-width:100%;max-height:100%;border-radius:4px}
+#lb button{position:absolute;top:env(safe-area-inset-top,12px);right:12px;font-size:2rem;background:none;border:0;color:#fff;cursor:pointer}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+<h1>আমার ছবির গ্যালারি</h1>
+<p>নতুন ছবি নিয়মিত যোগ হয়</p>
+</header>
+<main id="g"><p id="msg">ছবি লোড হচ্ছে…</p></main>
+<div id="lb" role="dialog" aria-label="ছবি"><button aria-label="বন্ধ করুন">×</button><img alt=""></div>
+<script>
+// ছবি রাখার ফোল্ডারের নাম (repo-র ভেতরে)
+var FOLDER = "photos";
+var host = location.hostname, g = document.getElementById("g");
+var owner = host.endsWith(".github.io") ? host.split(".")[0] : "";
+var seg = location.pathname.split("/")[1];
+var repo = (seg && !seg.includes(".")) ? seg : owner + ".github.io";
+var ok = /\.(jpe?g|png|webp|gif|avif)$/i;
+
+function msg(t){g.innerHTML='<p id="msg">'+t+'</p>'}
+function alt(n){return n.replace(/\.[^.]+$/,"").replace(/[-_]+/g," ")}
+
+fetch("https://api.github.com/repos/"+owner+"/"+repo+"/contents/"+FOLDER)
+.then(function(r){if(!r.ok)throw 0;return r.json()})
+.then(function(list){
+  var imgs=list.filter(function(f){return ok.test(f.name)}).reverse();
+  if(!imgs.length){msg("এখনো কোনো ছবি নেই।");return}
+  g.innerHTML="";
+  imgs.forEach(function(f){
+    var fig=document.createElement("figure"),im=new Image();
+    im.src=FOLDER+"/"+encodeURIComponent(f.name);im.alt=alt(f.name);im.loading="lazy";
+    im.onclick=function(){open(im.src,im.alt)};
+    fig.appendChild(im);g.appendChild(fig);
+  });
+}).catch(function(){msg("ছবি লোড করা যায়নি। "+FOLDER+" ফোল্ডারে ছবি আছে কিনা দেখুন।")});
+
+var lb=document.getElementById("lb"),lbi=lb.querySelector("img");
+function open(s,a){lbi.src=s;lbi.alt=a;lb.classList.add("on")}
+lb.onclick=function(){lb.classList.remove("on")};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")lb.classList.remove("on")});
+</script>
+</body>
+</html>
