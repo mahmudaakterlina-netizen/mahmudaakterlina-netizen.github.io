@@ -20,7 +20,6 @@ main{max-width:1200px;margin:0 auto;padding:0 .75rem 3rem;columns:2 160px;column
 @media(min-width:800px){main{columns:3 240px}}
 figure{margin:0 0 .75rem;break-inside:avoid}
 figure img{width:100%;display:block;border-radius:6px;cursor:zoom-in;background:#0002}
-#msg{text-align:center;color:var(--mute);padding:3rem 1rem;column-span:all}
 #lb{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:9;padding:1rem}
 #lb.on{display:flex}
 #lb img{max-width:100%;max-height:100%;border-radius:4px}
@@ -32,38 +31,32 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-off
 <header>
 <h1>মাহমুদা আক্তার লিনা। Mahmuda Akter Lina</h1>
 </header>
-<main id="g"><p id="msg">ছবি লোড হচ্ছে…</p></main>
+<main id="g"></main>
 <div id="lb" role="dialog" aria-label="ছবি"><button aria-label="বন্ধ করুন">×</button><img alt=""></div>
 <script>
-// ছবি রাখার ফোল্ডারের নাম (repo-র ভেতরে)
 var FOLDER = "photos";
-var host = location.hostname, g = document.getElementById("g");
-var owner = host.endsWith(".github.io") ? host.split(".")[0] : "";
-var seg = location.pathname.split("/")[1];
-var repo = (seg && !seg.includes(".")) ? seg : owner + ".github.io";
-var ok = /\.(jpe?g|png|webp|gif|avif)$/i;
 
-function msg(t){g.innerHTML='<p id="msg">'+t+'</p>'}
-function alt(n){return n.replace(/\.[^.]+$/,"").replace(/[-_]+/g," ")}
+// নতুন ছবি যোগ করতে এখানে একটা নতুন লাইন বাড়ান
+var PHOTOS = [
+  "IMG-20220819-WA0014.jpg",
+  "IMG_20220218_153544.jpg"
+];
 
-fetch("https://api.github.com/repos/"+owner+"/"+repo+"/contents/"+FOLDER)
-.then(function(r){if(!r.ok)throw 0;return r.json()})
-.then(function(list){
-  var imgs=list.filter(function(f){return ok.test(f.name)}).reverse();
-  if(!imgs.length){msg("এখনো কোনো ছবি নেই।");return}
-  g.innerHTML="";
-  imgs.forEach(function(f){
-    var fig=document.createElement("figure"),im=new Image();
-    im.src=FOLDER+"/"+encodeURIComponent(f.name);im.alt=alt(f.name);im.loading="lazy";
-    im.onclick=function(){open(im.src,im.alt)};
-    fig.appendChild(im);g.appendChild(fig);
-  });
-}).catch(function(){msg("ছবি লোড করা যায়নি। "+FOLDER+" ফোল্ডারে ছবি আছে কিনা দেখুন।")});
+var g = document.getElementById("g");
+PHOTOS.forEach(function(name){
+  var fig = document.createElement("figure"), im = new Image();
+  im.src = FOLDER + "/" + encodeURIComponent(name);
+  im.alt = "মাহমুদা আক্তার লিনা। Mahmuda Akter Lina";
+  im.loading = "lazy";
+  im.onclick = function(){ openLb(im.src, im.alt); };
+  fig.appendChild(im);
+  g.appendChild(fig);
+});
 
-var lb=document.getElementById("lb"),lbi=lb.querySelector("img");
-function open(s,a){lbi.src=s;lbi.alt=a;lb.classList.add("on")}
-lb.onclick=function(){lb.classList.remove("on")};
-document.addEventListener("keydown",function(e){if(e.key==="Escape")lb.classList.remove("on")});
+var lb = document.getElementById("lb"), lbi = lb.querySelector("img");
+function openLb(s, a){ lbi.src = s; lbi.alt = a; lb.classList.add("on"); }
+lb.onclick = function(){ lb.classList.remove("on"); };
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") lb.classList.remove("on"); });
 </script>
 </body>
 </html>
